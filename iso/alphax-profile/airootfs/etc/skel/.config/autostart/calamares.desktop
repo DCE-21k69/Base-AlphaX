@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Instalar AlphaX
+Exec=sudo calamares
+Icon=calamares
+Terminal=false
+Categories=System;
+X-GNOME-Autostart-enabled=true

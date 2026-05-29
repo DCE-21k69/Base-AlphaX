@@ -1,0 +1,155 @@
+/* ═══════════════════════════════════
+   CODEX WM — ALPHAX BAR THEME
+   Tokyo Night inspired
+═══════════════════════════════════ */
+
+@define-color bg        #1a1b26;
+@define-color bg2       #16161e;
+@define-color border    #7aa2f7;
+@define-color accent    #bb9af7;
+@define-color green     #9ece6a;
+@define-color yellow    #e0af68;
+@define-color red       #f7768e;
+@define-color fg        #c0caf5;
+@define-color fg-dim    #565f89;
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Noto Sans", sans-serif;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @fg;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background: @bg;
+    border: 1px solid rgba(122, 162, 247, 0.2);
+    border-radius: 10px;
+    padding: 0 8px;
+    margin: 0 4px;
+}
+
+/* Logo AlphaX */
+#custom-logo {
+    color: @accent;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 0 12px 0 8px;
+    margin-right: 4px;
+}
+
+/* Workspaces */
+#workspaces button {
+    padding: 0 6px;
+    color: @fg-dim;
+    background: transparent;
+    border-radius: 6px;
+    margin: 4px 2px;
+    transition: all 0.2s ease;
+}
+
+#workspaces button:hover {
+    background: rgba(122, 162, 247, 0.15);
+    color: @fg;
+}
+
+#workspaces button.active {
+    background: rgba(122, 162, 247, 0.25);
+    color: @border;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    background: rgba(247, 118, 142, 0.25);
+    color: @red;
+}
+
+/* Ventana activa */
+#window {
+    color: @fg-dim;
+    padding: 0 10px;
+    font-style: italic;
+}
+
+/* Reloj */
+#clock {
+    color: @fg;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 0 12px;
+}
+
+/* Layout toggle */
+#custom-layout {
+    color: @accent;
+    font-size: 16px;
+    padding: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+#custom-layout:hover {
+    background: rgba(187, 154, 247, 0.2);
+}
+
+/* Sonido */
+#pulseaudio {
+    color: @green;
+    padding: 0 10px;
+}
+
+#pulseaudio.muted {
+    color: @fg-dim;
+}
+
+/* Red */
+#network {
+    color: @border;
+    padding: 0 10px;
+}
+
+#network.disconnected {
+    color: @red;
+}
+
+/* Batería */
+#battery {
+    color: @green;
+    padding: 0 10px;
+}
+
+#battery.warning {
+    color: @yellow;
+}
+
+#battery.critical {
+    color: @red;
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    to { opacity: 0.3; }
+}
+
+/* Notificaciones */
+#custom-notifications {
+    color: @yellow;
+    font-size: 15px;
+    padding: 0 10px;
+}
+
+/* Tray */
+#tray {
+    padding: 0 8px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
