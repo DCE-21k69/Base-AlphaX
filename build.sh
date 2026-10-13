@@ -55,7 +55,7 @@ if [ -n "$CONTAINER_ENGINE" ]; then
         -v "$REPO_ROOT:/workspace" \
         -w /workspace \
         archlinux:latest \
-        bash -c "pacman -Syu --noconfirm archiso git && ./build.sh"
+        bash -c "pacman -Syu --noconfirm archiso grub git && ./build.sh"
     exit 0
 fi
 

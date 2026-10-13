@@ -8,6 +8,9 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     name: Validar Scripts, JSONC y Configuración
@@ -51,7 +54,7 @@ jobs:
               grep -q "^DisableSandbox" /etc/pacman.conf || sed -i "/^\[options\]/a DisableSandbox" /etc/pacman.conf
               pacman-key --init
               pacman-key --populate archlinux
-              pacman -Syu --noconfirm archiso git sudo
+              pacman -Syu --noconfirm archiso grub dosfstools mtools libisoburn squashfs-tools git sudo
               ln -sfn /workspace/iso/alphax-profile/local-repo /tmp/alphax-local-repo
               chmod +x ./scripts/check.sh ./build.sh
               ./scripts/check.sh
@@ -72,3 +75,27 @@ jobs:
             out/*.iso.sha256
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publicar ISO en GitHub Releases (v1.0.0)
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "⚡ AlphaX Linux v1.0.0 — Gaming Edition (Codex WM / Kernel Zen)"
+          body: |
+            ## ⚡ AlphaX Linux v1.0.0 — Gaming Edition (`x86_64`)
+            ISO oficial de **AlphaX Linux** compilada automáticamente con:
+            - **Kernel:** `linux-zen` (Low-Latency Gaming + `nowatchdog tsc=reliable split_lock_detect=off`)
+            - **Escritorio:** **Codex WM** (Hyprland + Waybar + Rofi + SwayNC + Tema *Tokyo Night*)
+            - **Modo Competitivo Zero-Lag:** `SUPER + G` (0 Blur/Animaciones + Tearing ON)
+            - **AlphaX Control Center:** `SUPER + A` / `alphax` (Instalador de Proton-GE en 1 clic, Gobernador CPU, Auto-Drivers GPU)
+            - **Bootloader & Splash:** Tema GRUB **Touhou Project - Komeiji Koishi** + Animación de inicio **Plymouth** estilo Zorin OS
+            - **Tuning incluido:** SteamOS `vm.max_map_count = 2147483642`, Red **TCP BBR + fq**, Swap **ZRAM (`zstd`)** y reglas `udev` NVMe/SSD
+            - **Credenciales Live:** Usuario `liveuser` / Contraseña `liveuser`
+          files: |
+            out/*.iso
+            out/*.iso.sha256
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
