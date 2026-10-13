@@ -108,7 +108,7 @@ GAMING_FILES=(
     iso/alphax-profile/airootfs/etc/udev/rules.d/99-alphax-gaming.rules
     iso/alphax-profile/airootfs/etc/mkinitcpio.d/linux-zen.preset
     iso/alphax-profile/airootfs/etc/os-release
-    iso/alphax-profile/airootfs/etc/lsb-release
+    iso/alphax-profile/airootfs/usr/local/bin/alphax-branding-apply
     iso/alphax-profile/airootfs/etc/pacman.d/hooks/90-alphax-branding.hook
     iso/alphax-profile/airootfs/etc/default/grub
     iso/alphax-profile/airootfs/usr/share/grub/themes/komeiji_koishi/theme.txt

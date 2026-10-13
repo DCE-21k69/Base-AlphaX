@@ -9,8 +9,9 @@ systemctl enable NetworkManager.service
 systemctl enable seatd.service
 
 # Crea grupos necesarios si no existen
-groupadd -f seat
-groupadd -f autologin
+for grp in wheel seat autologin video audio input storage games; do
+    groupadd -f "$grp"
+done
 
 # Configura zsh como shell por defecto para root y bloquea login sin contraseña
 chsh -s /usr/bin/zsh root
@@ -61,6 +62,9 @@ chmod +x /usr/local/bin/alphax \
 
 # Aplicar identidad oficial de AlphaX Linux en /etc/os-release y /etc/lsb-release
 /usr/local/bin/alphax-branding-apply
+
+# Limpiar posibles archivos .pacnew generados durante pacstrap
+find /etc -name "*.pacnew" -delete 2>/dev/null || true
 
 # Copiar todo el esqueleto (/etc/skel) a liveuser y root
 cp -rT /etc/skel /home/liveuser
