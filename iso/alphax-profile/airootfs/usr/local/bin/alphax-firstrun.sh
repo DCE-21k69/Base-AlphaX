@@ -1,20 +1,14 @@
-#!/bin/bash
-# AlphaX - Primer arranque: instala Oh My Zsh y configura zsh
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════
+# AlphaX Linux — Primer arranque (Offline-safe)
+# ═══════════════════════════════════════════════════
+set -euo pipefail
 
-# Instala Oh My Zsh sin interacción
+# Solo intentar instalar Oh My Zsh si hay conexión real a Internet (timeout 3s)
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-
-    # Instala plugins extra
-    git clone https://github.com/zsh-users/zsh-autosuggestions \
-        ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting \
-        ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-
-    echo "Oh My Zsh instalado ✓"
+    if curl -fsSL --connect-timeout 3 https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o /tmp/omz-install.sh 2>/dev/null; then
+        sh /tmp/omz-install.sh --unattended --keep-zshrc || true
+        rm -f /tmp/omz-install.sh
+        echo "Oh My Zsh instalado ✓"
+    fi
 fi
-
-# Cambia shell a zsh
-chsh -s $(which zsh) $USER
-echo "ZSH configurado como shell por defecto ✓"

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Instalar AlphaX Linux
+GenericName=Instalador del Sistema
+Comment=Instala AlphaX Linux en tu disco duro
+Exec=sudo -E calamares
+Icon=calamares
+Terminal=false
+Categories=System;
+Keywords=installer;calamares;alphax;instalar;
+StartupNotify=true

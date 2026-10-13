@@ -1,3 +1,8 @@
+# Directorios temporales y de salida de mkarchiso
 work/
 out/
-codex-wm/target/
+*.iso
+*.iso.sha256
+*.swp
+*~
+.DS_Store

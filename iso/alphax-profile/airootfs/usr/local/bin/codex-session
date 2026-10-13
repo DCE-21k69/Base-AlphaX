@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════
+# Codex WM — Session Launcher (AlphaX Linux)
+# ═══════════════════════════════════════════════════
+set -euo pipefail
+
+# Asegurar que el usuario tenga las configuraciones de Codex WM en su HOME
+if [ ! -f "$HOME/.config/codex/config/hyprland.conf" ] && [ -d "/etc/skel/.config/codex" ]; then
+    mkdir -p "$HOME/.config"
+    cp -rn /etc/skel/.config/codex "$HOME/.config/"
+    chmod +x "$HOME/.config/codex/scripts/"*.sh 2>/dev/null || true
+fi
+
+# Variables de entorno para Wayland y Gaming
+export XDG_CURRENT_DESKTOP="Hyprland"
+export XDG_SESSION_TYPE="wayland"
+export XDG_SESSION_DESKTOP="Hyprland"
+export QT_QPA_PLATFORM="wayland;xcb"
+export QT_QPA_PLATFORMTHEME="qt6ct"
+export GDK_BACKEND="wayland,x11"
+export MOZ_ENABLE_WAYLAND=1
+export SDL_VIDEODRIVER="wayland"
+export _JAVA_AWT_WM_NONREPARENTING=1
+export XCURSOR_SIZE=24
+
+# Iniciar sesión de Hyprland apuntando a la configuración de Codex WM
+exec Hyprland -c "$HOME/.config/codex/config/hyprland.conf"

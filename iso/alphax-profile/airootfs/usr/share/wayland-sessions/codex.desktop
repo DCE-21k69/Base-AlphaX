@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Codex WM (AlphaX)
+Comment=Window Manager Tiling/Mosaico Wayland de AlphaX Linux
+Exec=/usr/local/bin/codex-session
+Type=Application
+DesktopNames=Hyprland
+Keywords=tiling;wayland;compositor;alphax;codex;

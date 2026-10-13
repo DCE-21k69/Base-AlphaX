@@ -36,7 +36,19 @@ window#waybar {
     margin: 0 4px;
 }
 
-/* Logo AlphaX */
+/* Wallpaper picker & Logo AlphaX */
+#custom-wallpaper {
+    color: @border;
+    font-size: 15px;
+    padding: 0 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+#custom-wallpaper:hover {
+    background: rgba(122, 162, 247, 0.2);
+}
+
 #custom-logo {
     color: @accent;
     font-size: 15px;
@@ -86,10 +98,23 @@ window#waybar {
     padding: 0 12px;
 }
 
+/* Modo Competitivo Zero-Lag */
+#custom-gamemode {
+    color: @yellow;
+    font-weight: bold;
+    padding: 0 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+#custom-gamemode:hover {
+    background: rgba(224, 175, 104, 0.2);
+}
+
 /* Layout toggle */
 #custom-layout {
     color: @accent;
-    font-size: 16px;
+    font-size: 13px;
     padding: 0 10px;
     border-radius: 6px;
     transition: all 0.2s;

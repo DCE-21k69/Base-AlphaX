@@ -1,0 +1,19 @@
+# ═══════════════════════════════════════════════════════════════════
+# AlphaX Linux — Reglas Udev de Baja Latencia (I/O Scheduler & DMA Latency)
+# ═══════════════════════════════════════════════════════════════════
+
+# NVMe SSD: usar 'none' para acceso directo sin sobrecarga de cola
+ACTION=="add|change", KERNEL=="nvme[0-9]*n[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
+
+# SATA SSD / eMMC: usar 'mq-deadline' para menor latencia de lectura en juegos
+ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
+
+# HDD Mecánico: usar 'bfq' para no congelar el sistema durante cargas
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+
+# Permitir que los procesos de juegos controlen cpu_dma_latency (evita micro-stuttering por estados C profundos)
+DEVPATH=="/devices/virtual/misc/cpu_dma_latency", OWNER="root", GROUP="games", MODE="0660"
+
+# Acceso de baja latencia a temporizadores RTC y HPET
+KERNEL=="rtc0", GROUP="audio", MODE="0660"
+KERNEL=="hpet", GROUP="audio", MODE="0660"

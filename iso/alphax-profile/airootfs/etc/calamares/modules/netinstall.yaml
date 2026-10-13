@@ -1,0 +1,51 @@
+- name: "Codex WM (AlphaX Default — Incluido)"
+  description: "Window Manager Wayland Tiling/Mosaico con barra Tokyo Night (Ya preinstalado en la base offline)."
+  hidden: false
+  selected: true
+  critical: false
+  packages:
+    - hyprland
+    - waybar
+    - hyprpaper
+    - rofi-wayland
+    - kitty
+
+- name: "KDE Plasma (Requiere Internet)"
+  description: "Escritorio completo y tradicional con SDDM."
+  hidden: false
+  selected: false
+  critical: false
+  packages:
+    - plasma-meta
+    - sddm
+    - konsole
+
+- name: "GNOME (Requiere Internet)"
+  description: "Escritorio moderno y minimalista con GDM."
+  hidden: false
+  selected: false
+  critical: false
+  packages:
+    - gnome
+    - gdm
+
+- name: "XFCE (Requiere Internet)"
+  description: "Escritorio ligero y rápido con LightDM."
+  hidden: false
+  selected: false
+  critical: false
+  packages:
+    - xfce4
+    - xfce4-goodies
+    - lightdm
+    - lightdm-gtk-greeter
+
+- name: "Gaming Extras & Steam (Requiere Internet)"
+  description: "Cliente de Steam, Discord y herramientas adicionales para juegos."
+  hidden: false
+  selected: false
+  critical: false
+  packages:
+    - steam
+    - discord
+    - goverlay

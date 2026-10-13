@@ -1,0 +1,74 @@
+name: AlphaX ISO Build & CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validar Scripts, JSONC y Configuración
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run repository integrity checks
+        run: bash ./scripts/check.sh
+
+  build-iso:
+    name: Compilar ISO AlphaX Linux (x86_64)
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Liberar espacio en disco del Runner (35+ GB libres)
+        run: |
+          sudo rm -rf /usr/share/dotnet \
+                      /usr/local/lib/android \
+                      /opt/ghc \
+                      /opt/hostedtoolcache \
+                      /usr/local/share/boost
+          df -h
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Construir ISO en contenedor oficial Arch Linux
+        run: |
+          mkdir -p "$PWD/out"
+          docker run --rm --privileged \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            archlinux:latest \
+            bash -euxo pipefail -c '
+              sed -i "s/^#DisableSandbox/DisableSandbox/" /etc/pacman.conf
+              grep -q "^DisableSandbox" /etc/pacman.conf || sed -i "/^\[options\]/a DisableSandbox" /etc/pacman.conf
+              pacman-key --init
+              pacman-key --populate archlinux
+              pacman -Syu --noconfirm archiso git sudo
+              ln -sfn /workspace/iso/alphax-profile/local-repo /tmp/alphax-local-repo
+              chmod +x ./scripts/check.sh ./build.sh
+              ./scripts/check.sh
+              mkarchiso -v -w /tmp/archiso-work -o /workspace/out /workspace/iso/alphax-profile
+              cd /workspace/out
+              for iso in *.iso; do
+                sha256sum "$iso" > "${iso}.sha256"
+              done
+              ls -lh /workspace/out
+            '
+
+      - name: Subir ISO como Artifact de GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlphaX-Linux-ISO-x86_64
+          path: |
+            out/*.iso
+            out/*.iso.sha256
+          if-no-files-found: error
+          retention-days: 14

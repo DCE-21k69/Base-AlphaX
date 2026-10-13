@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=AlphaX Control Center
+GenericName=Centro de Control Gaming
+Comment=Gestiona Modo Zero-Lag, Gobernador CPU, Proton-GE y Drivers GPU
+Exec=/usr/local/bin/alphax menu
+Icon=input-gaming
+Terminal=false
+Categories=System;Settings;Game;
+Keywords=alphax;gaming;proton;cpu;drivers;zerolag;codex;
+StartupNotify=false

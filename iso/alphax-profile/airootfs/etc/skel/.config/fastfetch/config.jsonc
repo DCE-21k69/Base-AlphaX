@@ -4,81 +4,90 @@
         "source": "~/.config/fastfetch/alphax.txt",
         "type": "file",
         "color": {
-            "1": "35",
-            "2": "55"
+            "1": "magenta",
+            "2": "blue"
         },
         "padding": {
+            "top": 1,
+            "left": 2,
             "right": 4
         }
     },
     "display": {
         "color": "magenta",
-        "separator": " → "
+        "separator": " ❯ "
     },
     "modules": [
         {
             "type": "title",
             "color": {
-                "user": "35",
-                "at": "magenta",
-                "host": "55"
+                "user": "magenta",
+                "at": "white",
+                "host": "blue"
             }
         },
         "separator",
         {
             "type": "os",
-            "key": "  OS",
+            "key": "󰣇  Distro",
             "keyColor": "magenta"
         },
         {
             "type": "kernel",
-            "key": "  Kernel",
+            "key": "󰌽  Kernel",
             "keyColor": "magenta"
         },
         {
-            "type": "uptime",
-            "key": "  Uptime",
-            "keyColor": "magenta"
-        },
-        {
-            "type": "packages",
-            "key": "  Paquetes",
-            "keyColor": "magenta"
-        },
-        {
-            "type": "shell",
-            "key": "  Shell",
-            "keyColor": "magenta"
+            "type": "command",
+            "key": "⚡ Modo",
+            "keyColor": "blue",
+            "text": "if [ -f /tmp/codex-gamemode.lock ]; then echo 'ZERO-LAG Competitivo (BBR)'; else echo 'Tokyo Night (Gaming Ready)'; fi"
         },
         {
             "type": "wm",
-            "key": "  WM",
+            "key": "󱂬  WM",
+            "keyColor": "magenta",
+            "format": "Codex WM ({1})"
+        },
+        {
+            "type": "shell",
+            "key": "󰆍  Shell",
             "keyColor": "magenta"
         },
         {
             "type": "terminal",
-            "key": "  Terminal",
+            "key": "󰞷  Terminal",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "packages",
+            "key": "󰏖  Paquetes",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "uptime",
+            "key": "󰅐  Uptime",
             "keyColor": "magenta"
         },
         {
             "type": "cpu",
-            "key": "  CPU",
-            "keyColor": "magenta"
+            "key": "󰻠  CPU",
+            "keyColor": "blue"
         },
         {
             "type": "gpu",
-            "key": "  GPU",
-            "keyColor": "magenta"
+            "key": "󰢮  GPU",
+            "keyColor": "blue"
         },
         {
             "type": "memory",
-            "key": "  RAM",
-            "keyColor": "magenta"
+            "key": "󰍛  RAM",
+            "keyColor": "blue"
         },
         {
             "type": "disk",
-            "key": "  Disco",
-            "keyColor": "magenta"
+            "key": "󰋊  Disco",
+            "keyColor": "blue"
         },
         "separator",
         {

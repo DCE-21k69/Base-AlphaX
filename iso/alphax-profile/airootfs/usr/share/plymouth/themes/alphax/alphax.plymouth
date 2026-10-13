@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=AlphaX Gaming Boot
+Description=Animación de inicio oficial de AlphaX Linux (Estilo Zorin / Tokyo Night)
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/alphax
+ScriptFile=/usr/share/plymouth/themes/alphax/alphax.script

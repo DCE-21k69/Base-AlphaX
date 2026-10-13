@@ -8,7 +8,7 @@
     "margin-right": 10,
 
     "modules-left": [
-        "custom/wallpaper"
+        "custom/wallpaper",
         "custom/logo",
         "hyprland/workspaces",
         "hyprland/window"
@@ -19,6 +19,7 @@
     ],
 
     "modules-right": [
+        "custom/gamemode",
         "custom/layout",
         "pulseaudio",
         "network",
@@ -28,7 +29,8 @@
     ],
 
     "custom/logo": {
-        "format": "AlphaX",
+        "format": "⚡ AlphaX",
+        "on-click": "/usr/local/bin/alphax menu",
         "tooltip": false
     },
 
@@ -62,11 +64,20 @@
         "interval": 1
     },
 
+    "custom/gamemode": {
+        "format": "{}",
+        "exec": "~/.config/codex/scripts/gamemode-toggle.sh status",
+        "on-click": "~/.config/codex/scripts/gamemode-toggle.sh",
+        "interval": 2,
+        "tooltip": false
+    },
+
     "custom/layout": {
-        "exec": "echo ''",
+        "format": "{}",
+        "exec": "hyprctl getoption general:layout 2>/dev/null | awk '/str:/ {if ($2 == \"master\") print \"🪟 Mosaico\"; else print \"▦ Tiling\"}'",
         "on-click": "~/.config/codex/scripts/toggle-layout.sh",
         "interval": 2,
-        "tooltip": "Toggle Tiling/Mosaico"
+        "tooltip": false
     },
 
     "pulseaudio": {

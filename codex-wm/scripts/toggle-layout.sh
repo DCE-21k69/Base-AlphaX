@@ -1,6 +1,10 @@
-#!/bin/bash
-# Toggle entre dwindle (tiling) y master (mosaico)
-CURRENT=$(hyprctl getoption general:layout | grep -oP '(?<=str: )\w+')
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════
+# Codex WM — Toggle entre Dwindle (Tiling) y Master (Mosaico)
+# ═══════════════════════════════════════════════════
+set -euo pipefail
+
+CURRENT=$(hyprctl getoption general:layout 2>/dev/null | awk '/str:/ {print $2}')
 
 if [ "$CURRENT" = "dwindle" ]; then
     hyprctl keyword general:layout master

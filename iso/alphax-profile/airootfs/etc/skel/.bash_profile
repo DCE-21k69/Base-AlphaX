@@ -1,9 +1,4 @@
-# AlphaX - primer arranque
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    alphax-firstrun.sh
-fi
-
-# Si zsh está disponible, úsalo
-if [ -x /usr/bin/zsh ]; then
-    exec zsh
+# AlphaX Linux — Arranca Codex WM automáticamente en TTY1 (Bash login shell)
+if [ -z "${WAYLAND_DISPLAY:-}" ] && [ "${XDG_VTNR:-0}" -eq 1 ]; then
+    exec /usr/local/bin/codex-session
 fi

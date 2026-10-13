@@ -1,0 +1,11 @@
+NAME="AlphaX Linux"
+PRETTY_NAME="AlphaX Linux (Gaming Edition)"
+ID=alphax
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;122;162;247"
+HOME_URL="https://github.com/DCE-21k69/Base-AlphaX"
+DOCUMENTATION_URL="https://github.com/DCE-21k69/Base-AlphaX"
+SUPPORT_URL="https://github.com/DCE-21k69/Base-AlphaX/issues"
+BUG_REPORT_URL="https://github.com/DCE-21k69/Base-AlphaX/issues"
+LOGO=archlinux-logo

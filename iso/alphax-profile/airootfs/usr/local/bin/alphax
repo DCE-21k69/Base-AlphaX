@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════════════
+# ⚡ AlphaX Control Center — CLI & Rofi Gaming Hub (AlphaX Linux)
+# ═══════════════════════════════════════════════════════════════════
+set -euo pipefail
+
+VERSION="1.0.0"
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send "⚡ AlphaX Control" "$1" --icon="${2:-input-gaming}" || true
+}
+
+run_in_terminal() {
+    local title="$1"
+    shift
+    if [ -t 0 ]; then
+        "$@"
+    elif command -v kitty >/dev/null 2>&1; then
+        kitty --title "$title" sh -c "$*; echo ''; read -rp 'Presiona Enter para cerrar...' _"
+    else
+        "$@"
+    fi
+}
+
+cmd_status() {
+    local kernel gov bbr mapcount zram gamemode gpu
+    kernel="$(uname -r)"
+    gov="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo 'N/A')"
+    bbr="$(sysctl -n net.ipv4.tcp_congestion_control 2>/dev/null || echo 'N/A')"
+    mapcount="$(sysctl -n vm.max_map_count 2>/dev/null || echo 'N/A')"
+    zram="$(swapon --show=NAME,SIZE,USED 2>/dev/null | awk '/zram/ {print $1 " (" $2 ")"}' | head -n1)"
+    [ -z "$zram" ] && zram="Inactivo"
+    if [ -f /tmp/codex-gamemode.lock ]; then
+        gamemode="⚡ ZERO-LAG ACTIVO"
+    else
+        gamemode="󰊴 Normal (Tokyo Night)"
+    fi
+    gpu="$(lspci 2>/dev/null | awk -F': ' '/VGA|3D|Display/ {print $2}' | head -n1)"
+    [ -z "$gpu" ] && gpu="No detectada"
+
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║           ⚡ ALPHAX LINUX — GAMING STATUS v${VERSION}            ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    printf "║  %-20s : %-36s ║\n" "Modo Codex WM" "$gamemode"
+    printf "║  %-20s : %-36s ║\n" "Kernel" "$kernel"
+    printf "║  %-20s : %-36s ║\n" "Gobernador CPU" "$gov"
+    printf "║  %-20s : %-36s ║\n" "Red TCP Congestion" "$bbr"
+    printf "║  %-20s : %-36s ║\n" "SteamOS MapCount" "$mapcount"
+    printf "║  %-20s : %-36s ║\n" "Swap ZRAM (zstd)" "$zram"
+    printf "║  %-20s : %-36s ║\n" "GPU Principal" "${gpu:0:36}"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+}
+
+cmd_cpu() {
+    local mode="${1:-performance}"
+    echo "==> Cambiando gobernador de CPU a: $mode ..."
+    if command -v cpupower >/dev/null 2>&1; then
+        sudo cpupower frequency-set -g "$mode"
+    else
+        for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+            [ -f "$f" ] && echo "$mode" | sudo tee "$f" >/dev/null
+        done
+    fi
+    notify "Gobernador de CPU cambiado a: $mode 🔥" "processor"
+    echo "✓ Gobernador de CPU establecido en $mode"
+}
+
+cmd_proton_ge() {
+    echo "==> Consultando última versión de GE-Proton en GitHub..."
+    notify "Buscando última versión de Proton-GE..." "system-software-install"
+
+    local api_url="https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
+    local json tag url
+    json="$(curl -fsSL "$api_url")"
+    tag="$(printf '%s' "$json" | jq -r '.tag_name')"
+    url="$(printf '%s' "$json" | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url' | head -n1)"
+
+    if [ -z "$url" ] || [ "$url" = "null" ]; then
+        echo "✗ No se pudo obtener el enlace de descarga de Proton-GE."
+        exit 1
+    fi
+
+    local steam_compat="$HOME/.local/share/Steam/compatibilitytools.d"
+    mkdir -p "$steam_compat"
+    ln -sfn "$steam_compat" "$HOME/.steam/root/compatibilitytools.d" 2>/dev/null || true
+
+    if [ -d "$steam_compat/$tag" ]; then
+        echo "✓ $tag ya está instalado en $steam_compat/$tag"
+        notify "$tag ya está instalado ✓" "input-gaming"
+        return 0
+    fi
+
+    local tmp_tar="/tmp/${tag}.tar.gz"
+    echo "==> Descargando $tag ..."
+    curl -fL --progress-bar "$url" -o "$tmp_tar"
+    echo "==> Extrayendo $tag en $steam_compat ..."
+    tar -xzf "$tmp_tar" -C "$steam_compat"
+    rm -f "$tmp_tar"
+
+    echo "✓ $tag instalado correctamente. Reinicia Steam para usarlo."
+    notify "$tag instalado en Steam ✓" "input-gaming"
+}
+
+cmd_gpu_drivers() {
+    echo "==> Detectando tarjeta gráfica (GPU)..."
+    local gpu_info
+    gpu_info="$(lspci | grep -E 'VGA|3D|Display' || true)"
+    echo "$gpu_info"
+
+    local pkgs=()
+    if echo "$gpu_info" | grep -qi "NVIDIA"; then
+        echo "-> GPU NVIDIA detectada. Seleccionando drivers propietarios + Vulkan 32/64-bit..."
+        pkgs+=(nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader)
+    fi
+    if echo "$gpu_info" | grep -Eqi "AMD|ATI|Radeon"; then
+        echo "-> GPU AMD Radeon detectada. Seleccionando Mesa + RADV Vulkan 32/64-bit..."
+        pkgs+=(mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon xf86-video-amdgpu vulkan-icd-loader lib32-vulkan-icd-loader)
+    fi
+    if echo "$gpu_info" | grep -qi "Intel"; then
+        echo "-> GPU Intel detectada. Seleccionando Mesa + ANV Vulkan 32/64-bit..."
+        pkgs+=(mesa lib32-mesa vulkan-intel lib32-vulkan-intel intel-media-driver vulkan-icd-loader lib32-vulkan-icd-loader)
+    fi
+
+    if [ "${#pkgs[@]}" -eq 0 ]; then
+        echo "No se detectó un fabricante específico. Instalando Mesa genérico..."
+        pkgs=(mesa lib32-mesa vulkan-icd-loader lib32-vulkan-icd-loader)
+    fi
+
+    sudo pacman -S --needed --noconfirm "${pkgs[@]}"
+    notify "Drivers GPU Vulkan actualizados ✓" "video-display"
+    echo "✓ Drivers instalados correctamente."
+}
+
+cmd_optimize() {
+    echo "==> [1/3] Actualizando repositorios y paquetes del sistema..."
+    sudo pacman -Syu --noconfirm
+
+    if command -v flatpak >/dev/null 2>&1; then
+        echo "==> [2/3] Actualizando aplicaciones Flatpak..."
+        flatpak update -y || true
+    fi
+
+    echo "==> [3/3] Limpiando paquetes huérfanos y caché..."
+    mapfile -t orphans < <(pacman -Qdtq || true)
+    if [ "${#orphans[@]}" -gt 0 ]; then
+        sudo pacman -Rns --noconfirm "${orphans[@]}" || true
+    fi
+    sudo pacman -Sc --noconfirm || true
+    notify "Sistema actualizado y optimizado ✓" "system-software-update"
+    echo "✓ Optimización completada."
+}
+
+cmd_menu() {
+    local gamemode_label="⚡ Activar Modo Competitivo (Zero-Lag)"
+    if [ -f /tmp/codex-gamemode.lock ]; then
+        gamemode_label="󰊴 Desactivar Modo Zero-Lag (Volver a Tokyo Night)"
+    fi
+
+    local options=(
+        "$gamemode_label"
+        "🔥 CPU Modo Performance (Máximos FPS)"
+        "🌱 CPU Modo Schedutil / Equilibrado"
+        "🚀 Instalar / Actualizar Proton-GE (Steam)"
+        "🖥️ Auto-Detectar e Instalar Drivers GPU (AMD/Intel/NVIDIA)"
+        "📊 Ver Estado Gaming del Sistema (Kernel/BBR/ZRAM)"
+        "🧹 Actualizar y Limpiar Sistema (Pacman + Flatpak)"
+        "󰸉 Cambiar Wallpaper de Codex WM"
+        "󰤨 Abrir Menú de Redes Wi-Fi"
+    )
+
+    local choice
+    choice="$(printf '%s\n' "${options[@]}" | rofi -dmenu -i \
+        -p "⚡ AlphaX Control" \
+        -theme-str 'window {width: 520px;}' \
+        -no-custom || true)"
+
+    [ -z "$choice" ] && exit 0
+
+    case "$choice" in
+        *"Modo Competitivo"*|*"Modo Zero-Lag"*)
+            "$HOME/.config/codex/scripts/gamemode-toggle.sh"
+            ;;
+        *"CPU Modo Performance"*)
+            run_in_terminal "AlphaX CPU Performance" "$0" cpu performance
+            ;;
+        *"CPU Modo Schedutil"*)
+            run_in_terminal "AlphaX CPU Schedutil" "$0" cpu schedutil
+            ;;
+        *"Proton-GE"*)
+            run_in_terminal "Instalador Proton-GE" "$0" proton-ge
+            ;;
+        *"Drivers GPU"*)
+            run_in_terminal "Instalador Drivers GPU" "$0" gpu-drivers
+            ;;
+        *"Estado Gaming"*)
+            run_in_terminal "AlphaX Gaming Status" "$0" status
+            ;;
+        *"Actualizar y Limpiar"*)
+            run_in_terminal "Optimización AlphaX" "$0" optimize
+            ;;
+        *"Cambiar Wallpaper"*)
+            "$HOME/.config/codex/scripts/wallpaper-picker.sh"
+            ;;
+        *"Redes Wi-Fi"*)
+            "$HOME/.config/codex/scripts/wifi-menu.sh"
+            ;;
+    esac
+}
+
+case "${1:-menu}" in
+    status)      cmd_status ;;
+    gamemode)    "$HOME/.config/codex/scripts/gamemode-toggle.sh" ;;
+    cpu)         cmd_cpu "${2:-performance}" ;;
+    proton-ge)   cmd_proton_ge ;;
+    gpu-drivers) cmd_gpu_drivers ;;
+    optimize)    cmd_optimize ;;
+    menu)        cmd_menu ;;
+    -h|--help|help)
+        echo "Uso: alphax [comando]"
+        echo ""
+        echo "Comandos disponibles:"
+        echo "  menu                      Abre el Centro de Control interactivo en Rofi (por defecto)"
+        echo "  status                    Muestra el estado de Kernel Zen, BBR, ZRAM, CPU y Zero-Lag"
+        echo "  gamemode                  Alterna el Modo Competitivo Zero-Lag (SUPER + G)"
+        echo "  cpu [performance|powersave|schedutil]  Cambia el gobernador de la CPU"
+        echo "  proton-ge                 Descarga e instala el último GE-Proton en Steam"
+        echo "  gpu-drivers               Detecta tu GPU (AMD/Intel/NVIDIA) e instala drivers Vulkan"
+        echo "  optimize                  Actualiza el sistema y limpia paquetes huérfanos"
+        ;;
+    *)
+        echo "Comando desconocido: $1 (usa 'alphax --help')"
+        exit 1
+        ;;
+esac

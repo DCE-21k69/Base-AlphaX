@@ -1,44 +1,70 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════
+# AlphaX Linux — Configuración del entorno Live (airootfs)
+# ═══════════════════════════════════════════════════
+set -euo pipefail
 
-# Habilita servicios
-systemctl enable NetworkManager
-systemctl enable seatd
+# Habilita servicios esenciales de escritorio y red
+systemctl enable NetworkManager.service
+systemctl enable seatd.service
 
-# Crea grupo seat manualmente si no existe
+# Crea grupos necesarios si no existen
 groupadd -f seat
 groupadd -f autologin
 
-# Configura zsh como shell por defecto
+# Configura zsh como shell por defecto para root y bloquea login sin contraseña
 chsh -s /usr/bin/zsh root
+passwd -l root 2>/dev/null || true
 
-# Crea usuario live
-useradd -m -G wheel,seat,video,audio,input,storage,games liveuser 2>/dev/null || true
+# Crea usuario liveuser
+if ! id -u liveuser >/dev/null 2>&1; then
+    useradd -m -G wheel,seat,autologin,video,audio,input,storage,games -s /usr/bin/zsh liveuser
+fi
 echo "liveuser:liveuser" | chpasswd
-echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-# Cambia shell de liveuser a zsh
-chsh -s /usr/bin/zsh liveuser
+# Permisos sudo para grupo wheel en archivo separado validado
+mkdir -p /etc/sudoers.d
+echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/10-alphax-live
+chmod 440 /etc/sudoers.d/10-alphax-live
 
-# Copia nuestro zshrc
+# Configura .zshrc con soporte tanto offline (plugins de sistema) como Oh-My-Zsh
 cat > /etc/skel/.zshrc << 'ZSHRC'
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="darkblood"
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting archlinux sudo history colored-man-pages)
-source $ZSH/oh-my-zsh.sh 2>/dev/null || true
-export XDG_DATA_DIRS=$XDG_DATA_DIRS:/var/lib/flatpak/exports/share:~/.local/share/flatpak/exports/share
-alias ll='ls -lah'
+if [ -f "$ZSH/oh-my-zsh.sh" ]; then
+    ZSH_THEME="darkblood"
+    plugins=(git archlinux sudo history colored-man-pages)
+    source "$ZSH/oh-my-zsh.sh"
+else
+    PROMPT='%F{magenta}╭─[%F{cyan}%n%F{white}@%F{blue}AlphaX%F{magenta}]─[%F{white}%~%F{magenta}]
+╰─➤ %f'
+fi
+
+# Plugins nativos de Arch Linux (funcionan 100% offline)
+[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ] && \
+    source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && \
+    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share"
+alias ll='ls -lah --color=auto'
 alias update='sudo pacman -Syu && flatpak update -y'
 alias aur='yay -S'
 ZSHRC
 
-cp /etc/skel/.zshrc /home/liveuser/.zshrc
+# Asegurar permisos ejecutables en scripts de Codex WM y utilidades AlphaX
+chmod +x /etc/skel/.config/codex/scripts/*.sh 2>/dev/null || true
+chmod +x /usr/local/bin/alphax \
+         /usr/local/bin/alphax-branding-apply \
+         /usr/local/bin/codex-session \
+         /usr/local/bin/alphax-firstrun.sh \
+         /usr/local/bin/alphax-postinstall-cleanup.sh 2>/dev/null || true
+
+# Aplicar identidad oficial de AlphaX Linux en /etc/os-release y /etc/lsb-release
+/usr/local/bin/alphax-branding-apply
+
+# Copiar todo el esqueleto (/etc/skel) a liveuser y root
+cp -rT /etc/skel /home/liveuser
 cp /etc/skel/.zshrc /root/.zshrc
-chown liveuser:liveuser /home/liveuser/.zshrc
+chown -R liveuser:liveuser /home/liveuser
 
-# Copia configs de Codex
-mkdir -p /home/liveuser/.config/{hypr,codex,kitty,fastfetch,waybar}
-cp -r /etc/skel/.config/. /home/liveuser/.config/ 2>/dev/null || true
-chown -R liveuser:liveuser /home/liveuser/
-
-echo "AlphaX live configurado correctamente"
+echo "AlphaX live configurado correctamente ✓"

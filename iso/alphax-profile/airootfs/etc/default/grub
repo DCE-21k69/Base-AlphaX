@@ -1,0 +1,22 @@
+# ═══════════════════════════════════════════════════════════════════
+# AlphaX Linux — Configuración Predeterminada de GRUB (Sistema Instalado)
+# Incluye Tema Gráfico Komeiji Koishi + Animación Plymouth + Tuning Gaming
+# ═══════════════════════════════════════════════════════════════════
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="AlphaX Linux"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3 nowatchdog tsc=reliable split_lock_detect=off"
+GRUB_CMDLINE_LINUX=""
+
+# Precargar particiones GPT/MBR y módulos gráficos
+GRUB_PRELOAD_MODULES="part_gpt part_msdos png gfxterm gfxmenu"
+
+# Resolución gráfica y tema Komeiji Koishi
+GRUB_TERMINAL_INPUT="console"
+GRUB_GFXMODE="1920x1080,auto"
+GRUB_GFXPAYLOAD_LINUX="keep"
+GRUB_THEME="/usr/share/grub/themes/komeiji_koishi/theme.txt"
+GRUB_COLOR_NORMAL="light-cyan/black"
+GRUB_COLOR_HIGHLIGHT="black/light-magenta"
+GRUB_DISABLE_RECOVERY="true"
+GRUB_DISABLE_OS_PROBER="false"

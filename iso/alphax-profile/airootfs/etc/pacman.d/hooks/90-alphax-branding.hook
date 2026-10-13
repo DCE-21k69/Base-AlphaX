@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = filesystem
+Target = lsb-release
+
+[Action]
+Description = Manteniendo identidad oficial de AlphaX Linux en /etc/os-release...
+When = PostTransaction
+Exec = /usr/local/bin/alphax-branding-apply
