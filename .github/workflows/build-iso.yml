@@ -76,6 +76,25 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Preparar archivos para GitHub Releases (límite 2 GiB por archivo)
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p out-release
+          cp -f out/*.sha256 out-release/ 2>/dev/null || true
+          for iso in out/*.iso; do
+            [ -f "$iso" ] || continue
+            size=$(stat -c%s "$iso")
+            echo "Tamaño de $iso: $size bytes"
+            if [ "$size" -lt 2140000000 ]; then
+              echo "ISO < 2 GiB: subiendo archivo .iso directo a GitHub Releases"
+              cp -f "$iso" out-release/
+            else
+              echo "ISO >= 2 GiB: dividiendo en partes de 1900M para cumplir límite de GitHub Releases"
+              split -b 1900M -d "$iso" "out-release/$(basename "$iso").part"
+            fi
+          done
+          ls -lh out-release/
+
       - name: Publicar ISO en GitHub Releases (v1.0.0)
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
@@ -92,9 +111,9 @@ jobs:
             - **Bootloader & Splash:** Tema GRUB **Touhou Project - Komeiji Koishi** + Animación de inicio **Plymouth** estilo Zorin OS
             - **Tuning incluido:** SteamOS `vm.max_map_count = 2147483642`, Red **TCP BBR + fq**, Swap **ZRAM (`zstd`)** y reglas `udev` NVMe/SSD
             - **Credenciales Live:** Usuario `liveuser` / Contraseña `liveuser`
+            - *(Nota: Si la ISO en Assets aparece dividida en `.part00` y `.part01` por el límite de 2 GB de GitHub Releases, únelas en Linux con `cat alphax-*.iso.part* > alphax.iso` o en Windows CMD con `copy /b alphax-*.iso.part00 + alphax-*.iso.part01 alphax.iso`, o descarga el `.zip` directo desde el Artifact del Workflow).*
           files: |
-            out/*.iso
-            out/*.iso.sha256
+            out-release/*
           draft: false
           prerelease: false
         env:

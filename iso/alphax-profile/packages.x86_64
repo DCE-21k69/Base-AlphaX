@@ -4,11 +4,9 @@
 
 # --- Base del Sistema y Kernel Gaming (Linux-Zen) ---
 base
-base-devel
 linux-zen
 linux-zen-headers
 linux-firmware
-linux-firmware-marvell
 amd-ucode
 intel-ucode
 mkinitcpio
@@ -83,7 +81,6 @@ reflector
 bind
 ldns
 ndisc6
-nmap
 tcpdump
 
 # --- Audio (PipeWire) ---
@@ -136,7 +133,6 @@ fuzzel
 # --- Fuentes y Tipografía (Nerd Fonts + Noto) ---
 ttf-jetbrains-mono-nerd
 noto-fonts
-noto-fonts-cjk
 noto-fonts-emoji
 terminus-font
 
@@ -160,7 +156,6 @@ zsh-autosuggestions
 zsh-syntax-highlighting
 grml-zsh-config
 nano
-vim
 less
 diffutils
 man-db
@@ -171,9 +166,7 @@ tmux
 bolt
 libfido2
 libusb-compat
-openpgp-card-tools
 pcsclite
-sequoia-sq
 tpm2-tools
 tpm2-tss
 usbmuxd
@@ -200,5 +193,3 @@ hyperv
 
 # --- Instalador Gráfico (Calamares) ---
 calamares
-python-pyqt6
-qt6-webengine
